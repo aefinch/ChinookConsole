@@ -15,8 +15,11 @@ namespace ChinookConsoleApp
 	{
 		public object SumSales()
 		{
-			Console.WriteLine("Enter a year to see total sales per employee");
-			var whichYear = Console.ReadLine();
+			Console.WriteLine("Enter a date range to review employee sales:");
+			Console.Write("Beginning Date: ");
+			var firstDate = Console.ReadLine();
+			Console.Write("End Date: ");
+			var secondDate = Console.ReadLine();
 			using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["Chinook"].ConnectionString))
 			{
 				try
@@ -28,21 +31,20 @@ namespace ChinookConsoleApp
 						                            " from Employee as e " +
 													"join Customer as c on c.SupportRepId = e.EmployeeId " +
 													"join Invoice as i on i.CustomerId = c.CustomerId " +
-													"Where Year(i.InvoiceDate) = @selectedYear " +
-													"Group by e.EmployeeId, e.FirstName, e.LastName", new { @selectedYear = whichYear });
+													"Where i.InvoiceDate Between @firstDate And @secondDate " +
+													"Group by e.EmployeeId, e.FirstName, e.LastName", new { @firstDate = firstDate, @secondDate = secondDate });
 
-					if (Convert.ToInt32(whichYear) < 2009 || Convert.ToInt32(whichYear) > 2013)
+					/*if (Convert.ToInt32(whichYear) < 2009 || Convert.ToInt32(whichYear) > 2013)
 					{
 						Console.WriteLine($"There were no sales in year {whichYear}.");
 					}
 					else
 					{
+					}*/
 						foreach (var employee in results)
 						{
 							Console.WriteLine($"{employee.Id}.) {employee.FullName} {employee.Sales}");
 						}
-					}
-
 
 					Console.WriteLine("Press enter to return to the menu");
 					Console.ReadLine();
