@@ -2,6 +2,7 @@
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using Dapper;
 
 namespace ChinookConsoleApp
 {
@@ -16,7 +17,7 @@ namespace ChinookConsoleApp
 
             using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["Chinook"].ConnectionString))
             {
-                var employeeAdd = connection.CreateCommand();
+				/*var employeeAdd = connection.CreateCommand();
                 employeeAdd.CommandText = "Insert into Employee(FirstName, LastName) " +
                                           "Values(@firstName, @lastName)";
 
@@ -24,19 +25,25 @@ namespace ChinookConsoleApp
                 firstNameParameter.Value = x;
 
                 var lastNameParameter = employeeAdd.Parameters.Add("@lastName", SqlDbType.VarChar);
-                lastNameParameter.Value = y;
+                lastNameParameter.Value = y;*/
 
-                try
-                {
-                    connection.Open();
-                    var rowsAffected = employeeAdd.ExecuteNonQuery();
-                    Console.WriteLine(rowsAffected != 1 ? "Add Failed" : "Success!");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                    Console.WriteLine(ex.StackTrace);
-                }
+				try
+				{
+					connection.Open();
+					var rowsAffected = connection.Execute("Insert into Employee(FirstName, LastName) " +
+										  "Values(@FirstName, @LastName)", new { FirstName = x, LastName = y });
+					Console.WriteLine(rowsAffected != 1 ? "Add Failed" : "Success!");
+				}
+				catch (SqlException ex)
+				{
+					Console.WriteLine("You done messed up");
+					Console.WriteLine(ex.StackTrace);
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine(ex.Message);
+					Console.WriteLine(ex.StackTrace);
+				}
 
 
                 Console.WriteLine("Press enter to return to the menu.");

@@ -1,41 +1,46 @@
 ﻿using System;
 using System.Configuration;
 using System.Data.SqlClient;
+using Dapper;
 
 namespace ChinookConsoleApp
 {
+
+	public class EmployeeListResult
+	{
+		public int ID { get; set; }
+		public string FullName { get; set; }
+	}
     public class ListEmployees
     {
-        public void List()
+        public int List(string prompt)
         {
             Console.Clear();
 
             using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["Chinook"].ConnectionString))
             {
-                var employeeListCommand = connection.CreateCommand();
-
-                employeeListCommand.CommandText = "select employeeid as Id, " +
-                                                  "firstname + ' ' + lastname as fullname " +
-                                                  "from Employee";
 
                 try
                 {
                     connection.Open();
-                    var reader = employeeListCommand.ExecuteReader();
+					var result = connection.Query<EmployeeListResult>("select employeeid as Id, " +
+																	 "firstname + ' ' + lastname as fullname " +
+																	 "from Employee");
 
-                    while (reader.Read())
-                    {
-                        Console.WriteLine($"{reader["Id"]}.) {reader["FullName"]}");
-                    }
-
-                    Console.WriteLine("Press enter to return to the menu.");
-                    Console.ReadLine();
+					foreach (var employee in result)
+					{
+						Console.WriteLine($"{employee.ID}.) {employee.FullName}");
+					}
+                    Console.WriteLine(prompt);
+                    var selectedEmployee = Convert.ToInt32(Console.ReadLine());
+					return selectedEmployee;
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message);
                     Console.WriteLine(ex.StackTrace);
                 }
+				return 0;
             }
         }
     }
